@@ -1,10 +1,7 @@
-const { Redis } = require('@upstash/redis');
+const Redis = require('ioredis');
 const fetch = require('node-fetch');
 
-const redis = new Redis({
-url: process.env.KV_REST_API_URL,
-token: process.env.KV_REST_API_TOKEN,
-});
+const redis = new Redis("rediss://default:gQAAAAAAAgxlAAIgcDFmM2RjMjM0NzllMmI0ODkwOWQ2YmI4NjZlMDk3MDVlYQ@select-ibex-134245.upstash.io:6379");
 
 const KEY = 'icargo:guias';
 const DESTINOS = { FLO: 'Hacienda Cañaveral', BUC: 'Mirador del Cacique' };
@@ -15,10 +12,8 @@ async function sendWhatsApp(message) {
   const token = process.env.TWILIO_AUTH_TOKEN;
   const from = process.env.TWILIO_WHATSAPP_FROM;
   const to = process.env.TWILIO_WHATSAPP_TO;
-
   const url = `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`;
   const body = new URLSearchParams({ From: from, To: to, Body: message });
-
   const resp = await fetch(url, {
     method: 'POST',
     headers: {
@@ -51,10 +46,9 @@ module.exports = async (req, res) => {
     res.status(401).json({ error: 'No autorizado' }); return;
   }
 
-  const guias = await redis.get(KEY) || [];
-  console.log('Total guias:', guias.length);
-const activas = guias.filter(g => !esEntregada(g) && !g.archived);
-console.log('Activas:', activas.length);
+  const raw = await redis.get(KEY);
+  const guias = raw ? JSON.parse(raw) : [];
+  const activas = guias.filter(g => !esEntregada(g) && !g.archived);
 
   let notificaciones = 0;
   let resumen = [];
@@ -75,13 +69,11 @@ console.log('Activas:', activas.length);
       const textoAlerta = ((data.items[0]._vstDescription||'')+(data.items[0]._vstDetail||'')).toLowerCase();
       const tieneAlerta = ALERTAS.some(a => textoAlerta.includes(a));
 
-      // Actualizar en base de datos
       guia.lastStatus = nuevoEstado;
       guia.lastStatusId = data.items[0]._vstTypeStausId;
       guia.lastCheck = new Date().toISOString();
       guia.items = data.items;
 
-      // Notificar si cambió el estado
       if(nuevoEstado !== estadoAnterior) {
         const emoji = tieneAlerta ? '⚠️' : dias > 8 ? '🔴' : '✅';
         const msg = `${emoji} *El Casillero de USA*\n\n📦 Guía: ${guia.code}\n📍 Destino: ${dest}\n\n🆕 *${nuevoEstado}*\n⏱ ${dias} días en tránsito${tieneAlerta ? '\n\n⚠️ *Posible demora — revisa con iCargo*' : ''}`;
@@ -94,8 +86,7 @@ console.log('Activas:', activas.length);
     }
   }
 
-  // Guardar guías actualizadas
-  await redis.set(KEY, guias);
+  await redis.set(KEY, JSON.stringify(guias));
 
   res.status(200).json({
     ok: true,
