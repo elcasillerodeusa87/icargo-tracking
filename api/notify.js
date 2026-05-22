@@ -52,7 +52,9 @@ module.exports = async (req, res) => {
   }
 
   const guias = await redis.get(KEY) || [];
-  const activas = guias.filter(g => !esEntregada(g) && !g.archived);
+  console.log('Total guias:', guias.length);
+const activas = guias.filter(g => !esEntregada(g) && !g.archived);
+console.log('Activas:', activas.length);
 
   let notificaciones = 0;
   let resumen = [];
