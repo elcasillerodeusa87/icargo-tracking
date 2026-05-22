@@ -1,10 +1,11 @@
 {
   "name": "icargo-tracking",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "scripts": {
     "start": "node api/proxy.js"
   },
   "dependencies": {
-    "node-fetch": "^2.6.9"
+    "node-fetch": "^2.6.9",
+    "@vercel/kv": "^1.0.0"
   }
 }
