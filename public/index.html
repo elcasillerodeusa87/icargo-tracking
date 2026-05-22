@@ -1,75 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Casillero de USA — Seguimiento</title>
+<style>
+:root {
+  --azul: #1560BD;
+  --azul-dark: #0e4a94;
+  --azul-light: #e8f0fb;
+  --rojo: #E63329;
+  --rojo-light: #fdecea;
+  --amarillo: #F5A623;
+  --amarillo-light: #fef6e7;
+  --verde: #1a7a3f;
+  --verde-light: #e6f4ed;
+  --gris: #f5f5f3;
+  --gris2: #e8e8e6;
+  --texto: #1a1a1a;
+  --texto2: #666;
+  --blanco: #ffffff;
+  --radio: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--gris); color: var(--texto); min-height: 100vh; }
+.header { background: var(--azul); color: white; padding: 16px 20px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.header-logo { width: 44px; height: 44px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.header-title { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+.header-sub { font-size: 12px; opacity: 0.8; margin-top: 1px; }
+.header-stats { margin-left: auto; display: flex; gap: 16px; }
+.stat { text-align: center; }
+.stat-num { font-size: 20px; font-weight: 700; line-height: 1; }
+.stat-label { font-size: 10px; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.5px; }
+.container { max-width: 680px; margin: 0 auto; padding: 20px 16px 40px; }
+.add-card { background: white; border-radius: var(--radio); border: 1px solid var(--gris2); padding: 16px; margin-bottom: 20px; }
+.add-title { font-size: 13px; font-weight: 600; color: var(--texto2); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; }
+.add-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.add-row input[type=text] { flex: 1; min-width: 140px; padding: 10px 14px; border: 1.5px solid var(--gris2); border-radius: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; outline: none; transition: border-color 0.15s; }
+.add-row input[type=text]:focus { border-color: var(--azul); }
+.add-row input[type=text]::placeholder { text-transform: none; letter-spacing: 0; color: #aaa; }
+.add-row input[type=date] { padding: 10px 12px; border: 1.5px solid var(--gris2); border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.15s; color: var(--texto); }
+.add-row input[type=date]:focus { border-color: var(--azul); }
+.btn-add { background: var(--azul); color: white; border: none; border-radius: 8px; padding: 0 20px; height: 42px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px; transition: background 0.15s; }
+.btn-add:hover { background: var(--azul-dark); }
+.btn-add:disabled { opacity: 0.5; cursor: not-allowed; }
+.error-msg { background: var(--rojo-light); color: var(--rojo); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; border-left: 3px solid var(--rojo); display: none; }
+.resumen { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+.res-card { background: white; border-radius: 10px; padding: 12px; text-align: center; border: 1px solid var(--gris2); }
+.res-num { font-size: 22px; font-weight: 700; line-height: 1; }
+.res-label { font-size: 11px; color: var(--texto2); margin-top: 3px; }
+.res-card.activas .res-num { color: var(--azul); }
+.res-card.demoradas .res-num { color: var(--rojo); }
+.res-card.entregadas .res-num { color: var(--verde); }
+.fecha-grupo { margin-bottom: 24px; }
+.fecha-label { font-size: 12px; font-weight: 600; color: var(--texto2); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 10px; padding-left: 2px; display: flex; align-items: center; gap: 8px; }
+.fecha-line { flex: 1; height: 1px; background: var(--gris2); }
+.guia-card { background: white; border-radius: var(--radio); border: 1px solid var(--gris2); margin-bottom: 10px; overflow: hidden; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
+.guia-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); border-color: #ccc; }
+.guia-card.expandida { border-color: var(--azul); box-shadow: 0 2px 16px rgba(21,96,189,0.12); }
+.guia-card.alerta { border-left: 4px solid var(--rojo); }
+.guia-header { padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+.dest-badge { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.dest-flo { background: var(--azul-light); color: var(--azul); }
+.dest-buc { background: var(--amarillo-light); color: #8a5c00; }
+.dest-otro { background: var(--gris); color: var(--texto2); }
+.guia-info { flex: 1; min-width: 0; }
+.guia-code { font-size: 15px; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; }
+.guia-dest { font-size: 12px; color: var(--texto2); margin-top: 1px; }
+.guia-status { font-size: 12px; margin-top: 3px; font-weight: 500; }
+.guia-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.dias-badge { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 99px; }
+.dias-ok { background: var(--verde-light); color: var(--verde); }
+.dias-warn { background: var(--amarillo-light); color: #8a5c00; }
+.dias-late { background: var(--rojo-light); color: var(--rojo); }
+.dias-entregado { background: var(--gris); color: var(--texto2); }
+.alerta-chip { background: var(--rojo-light); color: var(--rojo); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; }
+.guia-detalle { border-top: 1px solid var(--gris2); padding: 16px; display: none; }
+.guia-detalle.visible { display: block; }
+.progress-bar { width: 100%; height: 5px; background: var(--gris2); border-radius: 3px; overflow: hidden; margin-bottom: 16px; }
+.progress-fill { height: 100%; background: var(--azul); border-radius: 3px; transition: width 0.4s; }
+.detalle-actions { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.btn-sm { background: white; color: var(--texto); border: 1px solid var(--gris2); border-radius: 7px; padding: 6px 12px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: background 0.15s; white-space: nowrap; }
+.btn-sm:hover { background: var(--gris); }
+.btn-sm:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-sm.azul { border-color: var(--azul); color: var(--azul); }
+.btn-sm.rojo { border-color: var(--rojo); color: var(--rojo); }
+.btn-sm.verde { border-color: var(--verde); color: var(--verde); }
+.nota-area { width: 100%; padding: 8px 12px; border: 1.5px solid var(--gris2); border-radius: 8px; font-size: 13px; font-family: inherit; resize: none; outline: none; margin-bottom: 8px; transition: border-color 0.15s; display: none; }
+.nota-area:focus { border-color: var(--azul); }
+.nota-area.visible { display: block; }
+.nota-guardada { font-size: 12px; color: var(--texto2); background: var(--gris); border-radius: 6px; padding: 6px 10px; margin-bottom: 12px; display: none; }
+.nota-guardada.visible { display: block; }
+.tl-section-label { font-size: 11px; font-weight: 600; color: var(--texto2); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
+.timeline { display: flex; flex-direction: column; }
+.tl-item { display: flex; gap: 12px; }
+.tl-left { display: flex; flex-direction: column; align-items: center; min-width: 18px; }
+.tl-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.tl-dot.first { background: var(--azul); }
+.tl-dot.done { background: var(--gris2); }
+.tl-line { width: 1.5px; background: var(--gris2); flex: 1; margin: 3px 0; min-height: 14px; }
+.tl-body { padding-bottom: 16px; flex: 1; }
+.tl-title { font-size: 14px; font-weight: 600; color: var(--texto); }
+.tl-desc { font-size: 12px; color: var(--texto2); margin-top: 2px; }
+.tl-date { font-size: 11px; color: #aaa; margin-top: 3px; }
+.tl-alerta { font-size: 12px; background: var(--rojo-light); color: var(--rojo); border-radius: 6px; padding: 4px 8px; margin-top: 4px; display: inline-block; font-weight: 500; }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--texto2); }
+.empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-text { font-size: 15px; line-height: 1.6; }
+@media (max-width: 480px) {
+  .resumen { grid-template-columns: repeat(2, 1fr); }
+  .header-stats { gap: 10px; }
+  .stat-num { font-size: 16px; }
+  .add-row { flex-direction: column; }
+  .add-row input, .btn-add { width: 100%; }
+}
+</style>
+</head>
+<body>
 
+<div class="header">
+  <div class="header-logo">📦</div>
+  <div>
+    <div class="header-title">El Casillero de USA</div>
+    <div class="header-sub">Seguimiento de envíos</div>
+  </div>
+  <div class="header-stats">
+    <div class="stat"><div class="stat-num" id="hActivas">0</div><div class="stat-label">Activas</div></div>
+    <div class="stat"><div class="stat-num" id="hDemoradas" style="color:#ffcc80;">0</div><div class="stat-label">Demora</div></div>
+    <div class="stat"><div class="stat-num" id="hEntregadas" style="color:#a5d6a7;">0</div><div class="stat-label">Entregadas</div></div>
+  </div>
+</div>
 
+<div class="container">
+  <div class="add-card">
+    <div class="add-title">Agregar nueva guía</div>
+    <div class="add-row">
+      <input type="text" id="inputCodigo" placeholder="Ej: FLO5590039182" maxlength="30" />
+      <input type="date" id="inputFecha" />
+      <button class="btn-add" id="btnAgregar" onclick="agregarGuia()">+ Agregar</button>
+    </div>
+  </div>
 
+  <div class="error-msg" id="errorMsg"></div>
 
+  <div class="resumen">
+    <div class="res-card activas"><div class="res-num" id="rActivas">0</div><div class="res-label">Activas</div></div>
+    <div class="res-card demoradas"><div class="res-num" id="rDemoradas">0</div><div class="res-label">Demoradas</div></div>
+    <div class="res-card entregadas"><div class="res-num" id="rEntregadas">0</div><div class="res-label">Entregadas</div></div>
+    <div class="res-card"><div class="res-num" id="rPromedio">—</div><div class="res-label">Días prom.</div></div>
+  </div>
 
+  <div id="listaGuias"></div>
 
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">🚚</div>
+    <div class="empty-text">No hay guías registradas.<br>Agrega una arriba para empezar.</div>
+  </div>
+</div>
 
+<script>
+const DESTINOS = { FLO: 'Hacienda Cañaveral', BUC: 'Mirador del Cacique' };
+const ALERTAS = ['retenida','reprogramado','demora','retenido','reajuste'];
+const STATUS_LABEL = {
+  15:'Guía creada', 18:'A recibir Coordinadora', 19:'En terminal origen',
+  21:'En transporte', 23:'En terminal destino', 25:'Consolidada',
+  35:'Aeropuerto Bogotá', 37:'Aeropuerto Miami', 43:'Asignado transportadora',
+  50:'Recibido Coordinadora', 162:'Bodega Bogotá', 999:'Entregada'
+};
 
+let guias = [];
 
-
-
-📦
-
-    
-El Casillero de USA
-
-    
-Seguimiento de envíos
-
-  
-0
-ACTIVAS
-0
-DEMORA
-0
-ENTREGADAS
-
-
-
-
-
-  
-
-    
-AGREGAR NUEVA GUÍA
-
-    
-+ Agregar
-
-  
-
-
-  
-
-  
-0
-Activas
-0
-Demoradas
-0
-Entregadas
-—
-Días prom.
-
-
-  
-
-
-  
-
-    
-🚚
-
-    
-No hay guías registradas.
-Agrega una arriba para empezar.
-
-  
-
-
-
-
-
-
-
+function getDestino(code) { return DESTINOS[code.substring(0,3).toUpperCase()] || null; }
+function getDestinoClass(code) {
+  const p = code.substring(0,3).toUpperCase();
+  if(p==='FLO') return 'dest-flo';
+  if(p==='BUC') return 'dest-buc';
+  return 'dest-otro';
+}
+function formatDate(s) {
+  if(!s||s.startsWith('0001')) return null;
+  return new Date(s).toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function formatFechaEnvio(s) {
+  if(!s) return '—';
+  const [y,m,d] = s.split('-');
+  const names = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return `${parseInt(d)} ${names[parseInt(m)]} ${y}`;
+}
+function diasEnTransito(g) {
+  const inicio = g.fechaEnvio ? new Date(g.fechaEnvio) : new Date(g.addedAt);
+  return Math.floor((Date.now() - inicio.getTime()) / 86400000);
+}
+function esAlerta(items) {
+  if(!items||!items.length) return false;
+  const t = ((items[0]._vstDescription||'')+(items[0]._vstDetail||'')).toLowerCase();
+  return ALERTAS.some(a => t.includes(a));
+}
+function esEntregada(g) {
+  if(!g.items||!g.items.length) return false;
+  const t = (g.items[0]._vstLastDescription||'').toLowerCase();
+  return t.includes('entregada') || g.lastStatusId === 999;
+}
+function diasBadge(g) {
+  if(esEntregada(g)) return {cls:'dias-entregado', txt:'Entregada ✓'};
+  const d = diasEnTransito(g);
+  if(d<=8) return {cls:'dias-ok', txt:`${d} días`};
+  if(d<=10) return {cls:'dias-warn', txt:`${d} días ⚠️`};
+  return {cls:'dias-late', txt:`${d} días 🔴`};
+}
+function showError(msg) {
+  const e = document.getElementById('errorMsg');
+  e.textContent = msg; e.style.display = 'block';
+  setTimeout(()=>e.style.display='none', 4000);
+}
+async function apiGet() {
+  const r = await fetch('/api/guias'); return r.json();
+}
+async function apiPost(body) {
+  const r = await fetch('/api/guias',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  return r.json();
+}
+async function fetchTracking(code) {
+  const r = await fetch(`/api/proxy?guia=${encodeURIComponent(code)}`);
+  if(!r.ok) throw new Error('Error');
+  return r.json();
+}
+async function cargarGuias() {
+  try { guias = await apiGet(); } catch(e) { guias = []; }
+  renderTodo();
+}
+async function agregarGuia() {
+  const code = document.getElementById('inputCodigo').value.trim().toUpperCase();
+  const fecha = document.getElementById('inputFecha').value;
+  if(!code) { showError('Ingresa el número de guía.'); return; }
+  if(!fecha) { showError('Ingresa la fecha de envío.'); return; }
+  if(guias.find(g=>g.code===code)) { showError('Esta guía ya está en la lista.'); return; }
+  const btn = document.getElementById('btnAgregar');
+  btn.disabled=true; btn.textContent='Buscando...';
+  try {
+    const data = await fetchTracking(code);
+    if(!data.items||!data.items.length) { showError('Guía no encontrada. Verifica el número.'); return; }
+    const l = data.items[0];
+    const guia = { code, fechaEnvio: fecha, addedAt: new Date().toISOString(),
+      lastCheck: new Date().toISOString(), lastStatus: l._vstLastDetail,
+      lastStatusId: l._vstTypeStausId, items: data.items, archived: false, note: '' };
+    await apiPost({action:'add', guia});
+    guias.unshift(guia);
+    document.getElementById('inputCodigo').value='';
+    renderTodo();
+  } catch(e) { showError('Error al consultar. Verifica tu conexión.'); }
+  finally { btn.disabled=false; btn.textContent='+ Agregar'; }
+}
+async function actualizarGuia(code) {
+  const guia = guias.find(g=>g.code===code);
+  if(!guia) return;
+  const btn = document.getElementById('btn-refresh-'+code);
+  if(btn) { btn.disabled=true; btn.textContent='Actualizando...'; }
+  try {
+    const data = await fetchTracking(code);
+    if(data.items&&data.items.length) {
+      const l = data.items[0];
+      Object.assign(guia,{lastCheck:new Date().toISOString(),lastStatus:l._vstLastDetail,
+        lastStatusId:l._vstTypeStausId,items:data.items});
+      await apiPost({action:'update', guia});
+      renderTodo();
+      setTimeout(()=>{ const d=document.getElementById('det-'+code); if(d)d.classList.add('visible');
+        const c=document.getElementById('card-'+code); if(c)c.classList.add('expandida'); },50);
+    }
+  } catch(e) { showError('No se pudo actualizar.'); }
+  finally { if(btn){btn.disabled=false; btn.textContent='↻ Actualizar';} }
+}
+async function archivarGuia(code) {
+  const guia = guias.find(g=>g.code===code);
+  if(!guia) return;
+  guia.archived = !guia.archived;
+  await apiPost({action:'archive', code});
+  renderTodo();
+}
+async function eliminarGuia(code) {
+  if(!confirm('¿Eliminar esta guía?')) return;
+  guias = guias.filter(g=>g.code!==code);
+  await apiPost({action:'delete', code});
+  renderTodo();
+}
+function toggleNota(code) {
+  const area = document.getElementById('nota-area-'+code);
+  if(area) area.classList.toggle('visible');
+}
+async function guardarNota(code) {
+  const area = document.getElementById('nota-area-'+code);
+  if(!area) return;
+  const note = area.value.trim();
+  const guia = guias.find(g=>g.code===code);
+  if(guia) guia.note = note;
+  await apiPost({action:'note', code, note});
+  area.classList.remove('visible');
+  const saved = document.getElementById('nota-saved-'+code);
+  if(saved) { saved.textContent = note ? '📝 '+note : ''; saved.classList.toggle('visible', !!note); }
+}
+function toggleDetalle(code) {
+  const det = document.getElementById('det-'+code);
+  const card = document.getElementById('card-'+code);
+  if(!det||!card) return;
+  const open = det.classList.contains('visible');
+  document.querySelectorAll('.guia-detalle.visible').forEach(d=>d.classList.remove('visible'));
+  document.querySelectorAll('.guia-card.expandida').forEach(c=>c.classList.remove('expandida'));
+  if(!open) { det.classList.add('visible'); card.classList.add('expandida'); }
+}
+function renderTodo() {
+  const activas = guias.filter(g=>!esEntregada(g)&&!g.archived);
+  const demoradas = activas.filter(g=>diasEnTransito(g)>8);
+  const entregadas = guias.filter(g=>esEntregada(g));
+  const tiempos = entregadas.map(g=>diasEnTransito(g)).filter(d=>d>0);
+  const prom = tiempos.length ? Math.round(tiempos.reduce((a,b)=>a+b,0)/tiempos.length) : null;
+  document.getElementById('hActivas').textContent = activas.length;
+  document.getElementById('hDemoradas').textContent = demoradas.length;
+  document.getElementById('hEntregadas').textContent = entregadas.length;
+  document.getElementById('rActivas').textContent = activas.length;
+  document.getElementById('rDemoradas').textContent = demoradas.length;
+  document.getElementById('rEntregadas').textContent = entregadas.length;
+  document.getElementById('rPromedio').textContent = prom ? prom+'d' : '—';
+  const visibles = guias.filter(g=>!g.archived);
+  document.getElementById('emptyState').style.display = visibles.length===0 ? 'block':'none';
+  const porFecha = {};
+  visibles.forEach(g=>{ const k=g.fechaEnvio||'sin-fecha'; if(!porFecha[k])porFecha[k]=[]; porFecha[k].push(g); });
+  const fechas = Object.keys(porFecha).sort((a,b)=>b.localeCompare(a));
+  document.getElementById('listaGuias').innerHTML = fechas.map(fecha=>{
+    const gs = porFecha[fecha];
+    const lbl = fecha==='sin-fecha'?'Sin fecha':formatFechaEnvio(fecha);
+    return `<div class="fecha-grupo">
+      <div class="fecha-label"><span>${lbl}</span><div class="fecha-line"></div><span style="color:#aaa;font-weight:400;">${gs.length} guía${gs.length!==1?'s':''}</span></div>
+      ${gs.map(g=>renderGuiaCard(g)).join('')}
+    </div>`;
+  }).join('');
+}
+function renderGuiaCard(g) {
+  const dest = getDestino(g.code);
+  const destClass = getDestinoClass(g.code);
+  const prefix = g.code.substring(0,3).toUpperCase();
+  const badge = diasBadge(g);
+  const alerta = esAlerta(g.items);
+  const entregada = esEntregada(g);
+  const statusLabel = g.lastStatus || STATUS_LABEL[g.lastStatusId] || 'En proceso';
+  const statusColor = entregada ? 'color:var(--verde)' : alerta ? 'color:var(--rojo)' : 'color:var(--azul)';
+  const items = (g.items||[]).filter(i=>i._vstVisible);
+  const pct = Math.round(items[0]?._vstPercentageValue||0);
+  const timeline = items.map((item,idx)=>{
+    const txt = ((item._vstDescription||'')+(item._vstDetail||'')).toLowerCase();
+    const esAl = ALERTAS.some(a=>txt.includes(a));
+    return `<div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-dot ${idx===0?'first':'done'}"></div>
+        ${idx<items.length-1?'<div class="tl-line"></div>':''}
+      </div>
+      <div class="tl-body">
+        <div class="tl-title">${item._vstDetail||''}</div>
+        ${item._vstDescription&&item._vstDescription!==item._vstDetail?`<div class="tl-desc">${item._vstDescription}</div>`:''}
+        ${formatDate(item._vstRealDate)?`<div class="tl-date">🕐 ${formatDate(item._vstRealDate)}</div>`:''}
+        ${esAl?'<div class="tl-alerta">⚠️ Posible demora — revisa con iCargo</div>':''}
+      </div>
+    </div>`;
+  }).join('');
+  return `<div class="guia-card${alerta?' alerta':''}" id="card-${g.code}" onclick="toggleDetalle('${g.code}')">
+    <div class="guia-header">
+      <div class="dest-badge ${destClass}">${prefix}</div>
+      <div class="guia-info">
+        <div class="guia-code">${g.code}</div>
+        <div class="guia-dest">${dest||'Destino desconocido'}</div>
+        <div class="guia-status" style="${statusColor}">${statusLabel}</div>
+      </div>
+      <div class="guia-right">
+        <span class="dias-badge ${badge.cls}">${badge.txt}</span>
+        ${alerta?'<span class="alerta-chip">⚠️ Alerta</span>':''}
+      </div>
+    </div>
+    <div class="guia-detalle" id="det-${g.code}" onclick="event.stopPropagation()">
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="detalle-actions">
+        <button class="btn-sm azul" id="btn-refresh-${g.code}" onclick="actualizarGuia('${g.code}')">↻ Actualizar</button>
+        <button class="btn-sm" onclick="toggleNota('${g.code}')">📝 Nota</button>
+        <button class="btn-sm verde" onclick="archivarGuia('${g.code}')">${g.archived?'↩ Restaurar':'✓ Marcar entregada'}</button>
+        <button class="btn-sm rojo" onclick="eliminarGuia('${g.code}')">🗑 Eliminar</button>
+        <span style="margin-left:auto;font-size:11px;color:#aaa;">Act: ${formatDate(g.lastCheck)||'—'}</span>
+      </div>
+      ${g.note?`<div class="nota-guardada visible" id="nota-saved-${g.code}">📝 ${g.note}</div>`:`<div class="nota-guardada" id="nota-saved-${g.code}"></div>`}
+      <textarea class="nota-area" id="nota-area-${g.code}" rows="2" placeholder="Ej: Cliente avisado, esperando pago aduana...">${g.note||''}</textarea>
+      <button class="btn-sm" style="margin-bottom:14px;display:none;" id="btn-nota-${g.code}" onclick="guardarNota('${g.code}')">Guardar nota</button>
+      <div class="tl-section-label">Historial de eventos</div>
+      <div class="timeline">${timeline||'<p style="color:#aaa;font-size:13px;">Sin eventos visibles</p>'}</div>
+    </div>
+  </div>`;
+}
+document.addEventListener('click', e => {
+  if(e.target.classList.contains('nota-area')) {
+    const id = e.target.id.replace('nota-area-','');
+    const btn = document.getElementById('btn-nota-'+id);
+    if(btn) btn.style.display='flex';
+  }
+});
+document.getElementById('inputCodigo').addEventListener('keydown',e=>{if(e.key==='Enter')agregarGuia();});
+document.getElementById('inputFecha').value = new Date().toISOString().split('T')[0];
+cargarGuias();
+</script>
+</body>
+</html>
