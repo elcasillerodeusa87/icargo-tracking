@@ -2,7 +2,8 @@ const { Redis } = require('@upstash/redis');
 
 const redis = new Redis({
   url: "https://select-ibex-134245.upstash.io",
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  token: gQAAAAAAAgxlAAIgcDFmM2RjMjM0NzllMmI0ODkwOWQ2YmI4NjZlMDk3MDVlYQ
+
 });
 
 const KEY = 'icargo:guias';
