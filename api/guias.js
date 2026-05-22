@@ -2,7 +2,7 @@ const { Redis } = require('@upstash/redis');
 
 const redis = new Redis({
   url: "https://select-ibex-134245.upstash.io",
-  token: gQAAAAAAAgxlAAIgcDFmM2RjMjM0NzllMmI0ODkwOWQ2YmI4NjZlMDk3MDVlYQ
+  token: "gQAAAAAAAgxlAAIgcDFmM2RjMjM0NzllMmI0ODkwOWQ2YmI4NjZlMDk3MDVlYQ"
 
 });
 
