@@ -1,225 +1,75 @@
 
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Seguimiento iCargo</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; }
-    .container { max-width: 700px; margin: 0 auto; padding: 2rem 1rem; }
-    h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
-    .subtitle { font-size: 14px; color: #666; margin-bottom: 1.5rem; }
-    .search-bar { display: flex; gap: 8px; margin-bottom: 1rem; }
-    .search-bar input { flex: 1; padding: 10px 14px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; background: white; outline: none; }
-    .search-bar input:focus { border-color: #1a1a1a; }
-    .search-bar input::placeholder { text-transform: none; letter-spacing: 0; }
-    .btn-primary { background: #1a1a1a; color: white; border: none; border-radius: 10px; padding: 0 20px; font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; height: 42px; display: flex; align-items: center; gap: 6px; transition: opacity 0.15s; }
-    .btn-primary:hover { opacity: 0.8; }
-    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-secondary { background: white; color: #1a1a1a; border: 1px solid #ddd; border-radius: 8px; padding: 0 14px; font-size: 13px; cursor: pointer; height: 32px; display: inline-flex; align-items: center; gap: 5px; transition: background 0.15s; }
-    .btn-secondary:hover { background: #f5f5f3; }
-    .error-msg { background: #fef2f2; color: #b91c1c; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 1rem; border: 1px solid #fecaca; }
-    .section-label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
-    .guias-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
-    .guia-card { background: white; border: 1px solid #e5e5e5; border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.15s; position: relative; }
-    .guia-card:hover { border-color: #aaa; }
-    .guia-card.active { border: 2px solid #1a1a1a; background: #fafafa; }
-    .guia-card .code { font-size: 13px; font-weight: 600; font-family: monospace; }
-    .guia-card .desc { font-size: 12px; color: #666; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .guia-card .badge { font-size: 11px; padding: 2px 8px; border-radius: 99px; margin-top: 8px; display: inline-block; font-weight: 500; }
-    .badge-transit { background: #fef3c7; color: #92400e; }
-    .badge-origin  { background: #dbeafe; color: #1e40af; }
-    .badge-dest    { background: #dcfce7; color: #166534; }
-    .badge-created { background: #f3f4f6; color: #4b5563; }
-    .badge-unknown { background: #f3f4f6; color: #4b5563; }
-    .del-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; cursor: pointer; color: #aaa; font-size: 16px; opacity: 0; transition: opacity 0.15s; padding: 2px; line-height: 1; }
-    .guia-card:hover .del-btn { opacity: 1; }
-    .detail-panel { background: white; border: 1px solid #e5e5e5; border-radius: 14px; padding: 1.25rem; }
-    .detail-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid #f0f0f0; }
-    .detail-code { font-size: 18px; font-weight: 600; font-family: monospace; }
-    .detail-meta { font-size: 13px; color: #666; margin-top: 4px; }
-    .progress-bar { width: 100%; height: 4px; background: #f0f0f0; border-radius: 2px; margin-bottom: 1.25rem; overflow: hidden; }
-    .progress-fill { height: 100%; background: #1a1a1a; border-radius: 2px; transition: width 0.5s ease; }
-    .actions-row { display: flex; align-items: center; margin-bottom: 1.25rem; }
-    .meta-info { font-size: 12px; color: #888; }
-    .days-badge { font-size: 12px; color: #888; margin-left: auto; }
-    .tl-item { display: flex; gap: 14px; }
-    .tl-left { display: flex; flex-direction: column; align-items: center; min-width: 20px; }
-    .tl-dot { width: 10px; height: 10px; border-radius: 50%; background: #1a1a1a; flex-shrink: 0; margin-top: 4px; }
-    .tl-dot.muted { background: #ddd; }
-    .tl-line { width: 1px; background: #eee; flex: 1; margin: 4px 0; min-height: 16px; }
-    .tl-content { padding-bottom: 18px; flex: 1; }
-    .tl-detail { font-size: 14px; font-weight: 500; line-height: 1.4; }
-    .tl-desc { font-size: 13px; color: #666; margin-top: 2px; line-height: 1.4; }
-    .tl-date { font-size: 12px; color: #999; margin-top: 4px; }
-    .empty-state { text-align: center; padding: 3rem 1rem; color: #888; }
-    .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
-    .empty-state p { font-size: 14px; line-height: 1.6; }
-  </style>
-</head>
-<body>
-<div class="container">
-  <h1>📦 Seguimiento iCargo</h1>
-  <p class="subtitle">Ingresa una guía para rastrear su estado en tiempo real</p>
 
-  <div class="search-bar">
-    <input type="text" id="guiaInput" placeholder="Ej: FLO5590039182" maxlength="30" />
-    <button class="btn-primary" id="addBtn" onclick="addGuia()">+ Agregar</button>
-  </div>
 
-  <div id="errorMsg" class="error-msg" style="display:none;"></div>
 
-  <div id="guiasSection" style="display:none;">
-    <div class="section-label">Guías activas</div>
-    <div class="guias-grid" id="guiasGrid"></div>
-  </div>
 
-  <div id="detailPanel" class="detail-panel" style="display:none;">
-    <div id="detailContent"></div>
-  </div>
 
-  <div id="emptyState" class="empty-state">
-    <div class="icon">🚚</div>
-    <p>Ingresa el número de guía que te dio iCargo<br>para ver su estado actualizado</p>
-  </div>
-</div>
 
-<script>
-let guias = [];
-try { guias = JSON.parse(localStorage.getItem('icargo_guias') || '[]'); } catch(e) {}
-let activeGuia = null;
 
-const STATUS_MAP = {
-  15:{label:'Guía creada',badge:'created'},
-  18:{label:'A recibir Coordinadora',badge:'origin'},
-  19:{label:'En terminal origen',badge:'origin'},
-  21:{label:'En transporte',badge:'transit'},
-  23:{label:'En terminal destino',badge:'dest'},
-  25:{label:'Consolidada',badge:'unknown'},
-  35:{label:'Aeropuerto Bogotá',badge:'transit'},
-  37:{label:'Aeropuerto Miami',badge:'origin'},
-  43:{label:'Asignado transportadora',badge:'transit'},
-  50:{label:'Recibido Coordinadora',badge:'transit'},
-  162:{label:'Bodega Bogotá',badge:'transit'},
-};
 
-function getBadge(id){return STATUS_MAP[id]?.badge||'unknown';}
-function getBadgeLabel(id,d){return STATUS_MAP[id]?.label||d||'En proceso';}
-function formatDate(s){
-  if(!s||s.startsWith('0001'))return null;
-  return new Date(s).toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-}
-function daysSince(s){
-  if(!s)return null;
-  return Math.floor((Date.now()-new Date(s).getTime())/86400000);
-}
 
-async function fetchTracking(code){
-  const resp = await fetch(`/api/proxy?guia=${encodeURIComponent(code)}`);
-  if(!resp.ok) throw new Error('Error');
-  return resp.json();
-}
 
-function saveGuias(){try{localStorage.setItem('icargo_guias',JSON.stringify(guias));}catch(e){}}
-function showError(msg){const e=document.getElementById('errorMsg');e.textContent=msg;e.style.display='block';}
-function hideError(){document.getElementById('errorMsg').style.display='none';}
+📦
 
-async function addGuia(){
-  const input=document.getElementById('guiaInput');
-  const code=input.value.trim().toUpperCase();
-  hideError();
-  if(!code)return;
-  if(guias.find(g=>g.code===code)){showError('Esta guía ya está en tu lista.');return;}
-  const btn=document.getElementById('addBtn');
-  btn.disabled=true;btn.textContent='Buscando...';
-  try{
-    const data=await fetchTracking(code);
-    if(!data.items||data.items.length===0){showError('Guía no encontrada.');return;}
-    const l=data.items[0];
-    guias.unshift({code,addedAt:new Date().toISOString(),lastCheck:new Date().toISOString(),
-      lastStatus:l._vstLastDetail,lastStatusId:l._vstTypeStausId,lastDate:l._vstRealDate,items:data.items});
-    saveGuias();input.value='';renderGuias();selectGuia(code);
-  }catch(e){showError('Error al consultar. Verifica tu conexión.');}
-  finally{btn.disabled=false;btn.textContent='+ Agregar';}
-}
+    
+El Casillero de USA
 
-async function refreshGuia(code){
-  const guia=guias.find(g=>g.code===code);if(!guia)return;
-  try{
-    const data=await fetchTracking(code);
-    if(data.items&&data.items.length>0){
-      const l=data.items[0];
-      Object.assign(guia,{lastCheck:new Date().toISOString(),lastStatus:l._vstLastDetail,
-        lastStatusId:l._vstTypeStausId,lastDate:l._vstRealDate,items:data.items});
-      saveGuias();renderGuias();if(activeGuia===code)showDetail(code);
-    }
-  }catch(e){showError('No se pudo actualizar.');}
-}
+    
+Seguimiento de envíos
 
-function deleteGuia(code,e){
-  e.stopPropagation();guias=guias.filter(g=>g.code!==code);saveGuias();
-  if(activeGuia===code){activeGuia=null;document.getElementById('detailPanel').style.display='none';
-    if(guias.length===0)document.getElementById('emptyState').style.display='block';}
-  renderGuias();
-}
+  
+0
+ACTIVAS
+0
+DEMORA
+0
+ENTREGADAS
 
-function renderGuias(){
-  const section=document.getElementById('guiasSection');
-  const grid=document.getElementById('guiasGrid');
-  const empty=document.getElementById('emptyState');
-  if(guias.length===0){section.style.display='none';empty.style.display='block';return;}
-  section.style.display='block';empty.style.display='none';
-  grid.innerHTML=guias.map(g=>`
-    <div class="guia-card ${activeGuia===g.code?'active':''}" onclick="selectGuia('${g.code}')">
-      <button class="del-btn" onclick="deleteGuia('${g.code}',event)">✕</button>
-      <div class="code">${g.code}</div>
-      <div class="desc">${g.lastStatus||'Sin estado'}</div>
-      <span class="badge badge-${getBadge(g.lastStatusId)}">${getBadgeLabel(g.lastStatusId,g.lastStatus)}</span>
-    </div>`).join('');
-}
 
-function showDetail(code){
-  const guia=guias.find(g=>g.code===code);if(!guia)return;
-  activeGuia=code;
-  document.getElementById('detailPanel').style.display='block';
-  document.getElementById('emptyState').style.display='none';
-  const items=(guia.items||[]).filter(i=>i._vstVisible);
-  const pct=Math.round(items[0]?._vstPercentageValue||0);
-  const days=daysSince(guia.addedAt);
-  const tl=items.map((item,idx)=>`
-    <div class="tl-item">
-      <div class="tl-left">
-        <div class="tl-dot ${idx===0?'':'muted'}"></div>
-        ${idx<items.length-1?'<div class="tl-line"></div>':''}
-      </div>
-      <div class="tl-content">
-        <div class="tl-detail">${item._vstDetail||''}</div>
-        ${item._vstDescription&&item._vstDescription!==item._vstDetail?`<div class="tl-desc">${item._vstDescription}</div>`:''}
-        ${formatDate(item._vstRealDate)?`<div class="tl-date">🕐 ${formatDate(item._vstRealDate)}</div>`:''}
-      </div>
-    </div>`).join('');
-  document.getElementById('detailContent').innerHTML=`
-    <div class="detail-header">
-      <div>
-        <div class="detail-code">${guia.code}</div>
-        <div class="detail-meta">${guia.lastStatus||'—'}</div>
-      </div>
-      <button class="btn-secondary" onclick="refreshGuia('${guia.code}')">↻ Actualizar</button>
-    </div>
-    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-    <div class="actions-row">
-      <span class="meta-info">Actualizado: ${formatDate(guia.lastCheck)||'—'}</span>
-      ${days!==null?`<span class="days-badge">${days} día${days!==1?'s':''} en seguimiento</span>`:''}
-    </div>
-    <div class="section-label" style="margin-bottom:12px;">Historial de eventos</div>
-    <div>${tl||'<p style="color:#888;font-size:14px;">Sin eventos visibles</p>'}</div>`;
-}
 
-function selectGuia(code){activeGuia=code;renderGuias();showDetail(code);}
-document.getElementById('guiaInput').addEventListener('keydown',e=>{if(e.key==='Enter')addGuia();});
-renderGuias();
-if(guias.length>0)selectGuia(guias[0].code);
-</script>
-</body>
-</html>
+
+
+  
+
+    
+AGREGAR NUEVA GUÍA
+
+    
++ Agregar
+
+  
+
+
+  
+
+  
+0
+Activas
+0
+Demoradas
+0
+Entregadas
+—
+Días prom.
+
+
+  
+
+
+  
+
+    
+🚚
+
+    
+No hay guías registradas.
+Agrega una arriba para empezar.
+
+  
+
+
+
+
+
+
+
