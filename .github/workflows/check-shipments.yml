@@ -2,7 +2,7 @@ name: Check shipment updates
 
 on:
   schedule:
-    - cron: '0 */3 * * *'
+    - cron: '0 13,15,17,19,21,23 * * *'
   workflow_dispatch:
 
 jobs:
