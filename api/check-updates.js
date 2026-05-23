@@ -2,7 +2,7 @@ const Redis = require('ioredis');
 const fetch = require('node-fetch');
 const twilio = require('twilio');
 
-const redis = new Redis(process.env.REDIS_URL);
+const redis = new Redis(process.env.UPSTASH_REDIS_URL_REAL);
 const KEY = 'icargo:guias';
 
 const DESTINOS = { FLO: 'Hacienda Cañaveral', BUC: 'Mirador del Cacique' };
