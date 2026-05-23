@@ -8,8 +8,8 @@ const KEY = 'icargo:guias';
 const DESTINOS = { FLO: 'Hacienda Cañaveral', BUC: 'Mirador del Cacique' };
 const ALERTAS = ['retenida', 'reprogramado', 'demora', 'retenido', 'reajuste'];
 
-const TWILIO_FROM = 'whatsapp:+14155238886';
-const TWILIO_TO = 'whatsapp:+573164068793';
+const TWILIO_FROM = process.env.TWILIO_WHATSAPP_FROM;
+const TWILIO_TO = process.env.TWILIO_WHATSAPP_TO;
 
 module.exports = async (req, res) => {
   // Seguridad: solo permitir si trae la clave secreta correcta
