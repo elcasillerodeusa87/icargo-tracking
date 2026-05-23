@@ -118,18 +118,19 @@ function diasEnTransito(g) {
 }
 
 async function enviarWhatsApp(client, code, destino, estado, dias, alerta) {
-  let body = `📦 El Casillero de USA\n\n`;
-  body += `Guía: ${code}\n`;
-  body += `Destino: ${destino}\n\n`;
-  body += `🆕 Nuevo estado: ${estado}\n`;
-  body += `⏱ ${dias} días en tránsito`;
+  const var1 = `${code} a ${destino}`;
+  let var2 = `${estado} (${dias} días en tránsito)`;
   if (alerta) {
-    body += `\n\n⚠️ Posible demora — revisa con iCargo`;
+    var2 += ` - ALERTA: posible demora`;
   }
 
   return client.messages.create({
     from: TWILIO_FROM,
     to: TWILIO_TO,
-    body
+    contentSid: 'HX350d429d32e64a552466cafecbe95f3c',
+    contentVariables: JSON.stringify({
+      "1": var1,
+      "2": var2
+    })
   });
 }
