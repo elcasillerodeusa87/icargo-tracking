@@ -1,0 +1,28 @@
+name: Check shipment updates
+
+on:
+  schedule:
+    - cron: '0 */3 * * *'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Vercel endpoint
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://icargo-tracking.vercel.app/api/check-updates)
+          
+          body=$(echo "$response" | head -n -1)
+          status=$(echo "$response" | tail -n 1)
+          
+          echo "===== Response ====="
+          echo "$body"
+          echo "===== Status code: $status ====="
+          
+          if [ "$status" -ne 200 ]; then
+            echo "ERROR: Status code was $status"
+            exit 1
+          fi
