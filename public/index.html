@@ -10,6 +10,7 @@
   --azul-dark: #0e4a94;
   --azul-light: #e8f0fb;
   --rojo: #E63329;
+  --rojo-dark: #B71C1C;
   --rojo-light: #fdecea;
   --amarillo: #F5A623;
   --amarillo-light: #fef6e7;
@@ -45,20 +46,22 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .btn-add:hover { background: var(--azul-dark); }
 .btn-add:disabled { opacity: 0.5; cursor: not-allowed; }
 .error-msg { background: var(--rojo-light); color: var(--rojo); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; border-left: 3px solid var(--rojo); display: none; }
-.resumen { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+.resumen { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
 .res-card { background: white; border-radius: 10px; padding: 12px; text-align: center; border: 1px solid var(--gris2); }
 .res-num { font-size: 22px; font-weight: 700; line-height: 1; }
 .res-label { font-size: 11px; color: var(--texto2); margin-top: 3px; }
 .res-card.activas .res-num { color: var(--azul); }
 .res-card.demoradas .res-num { color: var(--rojo); }
 .res-card.entregadas .res-num { color: var(--verde); }
+.res-card.retenidas .res-num { color: var(--rojo-dark); }
 .fecha-grupo { margin-bottom: 24px; }
 .fecha-label { font-size: 12px; font-weight: 600; color: var(--texto2); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 10px; padding-left: 2px; display: flex; align-items: center; gap: 8px; }
 .fecha-line { flex: 1; height: 1px; background: var(--gris2); }
 .guia-card { background: white; border-radius: var(--radio); border: 1px solid var(--gris2); margin-bottom: 10px; overflow: hidden; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
 .guia-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); border-color: #ccc; }
 .guia-card.expandida { border-color: var(--azul); box-shadow: 0 2px 16px rgba(21,96,189,0.12); }
-.guia-card.alerta { border-left: 4px solid var(--rojo); }
+.guia-card.alerta { border-left: 4px solid var(--amarillo); }
+.guia-card.retenida { border-left: 4px solid var(--rojo-dark); background: #fff5f5; }
 .guia-header { padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
 .dest-badge { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
 .dest-flo { background: var(--azul-light); color: var(--azul); }
@@ -74,7 +77,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .dias-warn { background: var(--amarillo-light); color: #8a5c00; }
 .dias-late { background: var(--rojo-light); color: var(--rojo); }
 .dias-entregado { background: var(--gris); color: var(--texto2); }
-.alerta-chip { background: var(--rojo-light); color: var(--rojo); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; }
+.alerta-chip { background: var(--amarillo-light); color: #8a5c00; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; }
+.retenida-chip { background: var(--rojo-dark); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
 .guia-detalle { border-top: 1px solid var(--gris2); padding: 16px; display: none; }
 .guia-detalle.visible { display: block; }
 .progress-bar { width: 100%; height: 5px; background: var(--gris2); border-radius: 3px; overflow: hidden; margin-bottom: 16px; }
@@ -104,6 +109,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .tl-desc { font-size: 12px; color: var(--texto2); margin-top: 2px; }
 .tl-date { font-size: 11px; color: #aaa; margin-top: 3px; }
 .tl-alerta { font-size: 12px; background: var(--rojo-light); color: var(--rojo); border-radius: 6px; padding: 4px 8px; margin-top: 4px; display: inline-block; font-weight: 500; }
+.tl-retenida { font-size: 12px; background: var(--rojo-dark); color: white; border-radius: 6px; padding: 4px 8px; margin-top: 4px; display: inline-block; font-weight: 700; }
 .empty-state { text-align: center; padding: 40px 20px; color: var(--texto2); }
 .empty-icon { font-size: 48px; margin-bottom: 12px; }
 .empty-text { font-size: 15px; line-height: 1.6; }
@@ -146,8 +152,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div class="resumen">
     <div class="res-card activas"><div class="res-num" id="rActivas">0</div><div class="res-label">Activas</div></div>
     <div class="res-card demoradas"><div class="res-num" id="rDemoradas">0</div><div class="res-label">Demoradas</div></div>
+    <div class="res-card retenidas"><div class="res-num" id="rRetenidas">0</div><div class="res-label">Retenidas</div></div>
     <div class="res-card entregadas"><div class="res-num" id="rEntregadas">0</div><div class="res-label">Entregadas</div></div>
     <div class="res-card"><div class="res-num" id="rPromedio">—</div><div class="res-label">Días prom.</div></div>
+    <div class="res-card"><div class="res-num" id="rFLO">0</div><div class="res-label">FLO</div></div>
+    <div class="res-card"><div class="res-num" id="rBUC">0</div><div class="res-label">BUC</div></div>
+    <div class="res-card"><div class="res-num" id="rSemana">0</div><div class="res-label">Esta semana</div></div>
   </div>
 
   <div id="listaGuias"></div>
@@ -160,7 +170,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 <script>
 const DESTINOS = { FLO: 'Hacienda Cañaveral', BUC: 'Mirador del Cacique' };
-const ALERTAS = ['retenida','reprogramado','demora','retenido','reajuste'];
+const ALERTAS = ['reprogramado','demora'];
+const RETENCION = ['retenida','retenido','reajuste'];
 const STATUS_LABEL = {
   15:'Guía creada', 18:'A recibir Coordinadora', 19:'En terminal origen',
   21:'En transporte', 23:'En terminal destino', 25:'Consolidada',
@@ -188,20 +199,54 @@ function formatFechaEnvio(s) {
   const names = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   return `${parseInt(d)} ${names[parseInt(m)]} ${y}`;
 }
+
+function esEntregada(g) {
+  if(!g.items||!g.items.length) return false;
+  // Buscar "entregada" en CUALQUIER evento del timeline
+  return g.items.some(item => {
+    const desc = (item._vstDescription||'').toLowerCase();
+    const det = (item._vstDetail||'').toLowerCase();
+    return desc.includes('entregada') || det.includes('entregada');
+  });
+}
+
+function getFechaEntrega(g) {
+  if(!esEntregada(g)) return null;
+  const evento = g.items.find(item => {
+    const desc = (item._vstDescription||'').toLowerCase();
+    const det = (item._vstDetail||'').toLowerCase();
+    return desc.includes('entregada') || det.includes('entregada');
+  });
+  return evento ? new Date(evento._vstRealDate) : null;
+}
+
 function diasEnTransito(g) {
   const inicio = g.fechaEnvio ? new Date(g.fechaEnvio) : new Date(g.addedAt);
+  
+  // Si está entregada, calcular hasta la fecha de entrega
+  if(esEntregada(g)) {
+    const fechaEntrega = getFechaEntrega(g);
+    if(fechaEntrega && !isNaN(fechaEntrega.getTime())) {
+      return Math.floor((fechaEntrega.getTime() - inicio.getTime()) / 86400000);
+    }
+  }
+  
+  // Si no está entregada, calcular hasta hoy
   return Math.floor((Date.now() - inicio.getTime()) / 86400000);
 }
+
+function esRetenida(items) {
+  if(!items||!items.length) return false;
+  const t = ((items[0]._vstDescription||'')+(items[0]._vstDetail||'')).toLowerCase();
+  return RETENCION.some(a => t.includes(a));
+}
+
 function esAlerta(items) {
   if(!items||!items.length) return false;
   const t = ((items[0]._vstDescription||'')+(items[0]._vstDetail||'')).toLowerCase();
   return ALERTAS.some(a => t.includes(a));
 }
-function esEntregada(g) {
-  if(!g.items||!g.items.length) return false;
-  const t = (g.items[0]._vstLastDescription||'').toLowerCase();
-  return t.includes('entregada') || g.lastStatusId === 999;
-}
+
 function diasBadge(g) {
   if(esEntregada(g)) return {cls:'dias-entregado', txt:'Entregada ✓'};
   const d = diasEnTransito(g);
@@ -209,6 +254,7 @@ function diasBadge(g) {
   if(d<=10) return {cls:'dias-warn', txt:`${d} días ⚠️`};
   return {cls:'dias-late', txt:`${d} días 🔴`};
 }
+
 function showError(msg) {
   const e = document.getElementById('errorMsg');
   e.textContent = msg; e.style.display = 'block';
@@ -230,11 +276,7 @@ async function fetchTracking(code) {
 }
 
 async function cargarGuias() {
-  try { 
-    guias = await apiGet(); 
-  } catch(e) { 
-    guias = []; 
-  }
+  try { guias = await apiGet(); } catch(e) { guias = []; }
   renderTodo();
 }
 
@@ -327,21 +369,46 @@ function toggleDetalle(code) {
 function renderTodo() {
   const activas = guias.filter(g=>!esEntregada(g)&&!g.archived);
   const demoradas = activas.filter(g=>diasEnTransito(g)>8);
+  const retenidas = activas.filter(g=>esRetenida(g.items));
   const entregadas = guias.filter(g=>esEntregada(g));
-  const tiempos = entregadas.map(g=>diasEnTransito(g)).filter(d=>d>0);
+  
+  // Calcular promedio SOLO de guías entregadas
+  const tiempos = entregadas.map(g=>diasEnTransito(g)).filter(d=>d>0 && d<100); // Filtrar valores raros
   const prom = tiempos.length ? Math.round(tiempos.reduce((a,b)=>a+b,0)/tiempos.length) : null;
+  
+  // Contar por destino
+  const flo = guias.filter(g=>g.code.toUpperCase().startsWith('FLO')&&!g.archived).length;
+  const buc = guias.filter(g=>g.code.toUpperCase().startsWith('BUC')&&!g.archived).length;
+  
+  // Entregas esta semana
+  const hoy = new Date();
+  const inicioSemana = new Date(hoy);
+  inicioSemana.setDate(hoy.getDate() - hoy.getDay());
+  inicioSemana.setHours(0,0,0,0);
+  const entregasSemana = entregadas.filter(g=>{
+    const fe = getFechaEntrega(g);
+    return fe && fe >= inicioSemana;
+  }).length;
+  
   document.getElementById('hActivas').textContent = activas.length;
   document.getElementById('hDemoradas').textContent = demoradas.length;
   document.getElementById('hEntregadas').textContent = entregadas.length;
   document.getElementById('rActivas').textContent = activas.length;
   document.getElementById('rDemoradas').textContent = demoradas.length;
+  document.getElementById('rRetenidas').textContent = retenidas.length;
   document.getElementById('rEntregadas').textContent = entregadas.length;
   document.getElementById('rPromedio').textContent = prom ? prom+'d' : '—';
+  document.getElementById('rFLO').textContent = flo;
+  document.getElementById('rBUC').textContent = buc;
+  document.getElementById('rSemana').textContent = entregasSemana;
+  
   const visibles = guias.filter(g=>!g.archived);
   document.getElementById('emptyState').style.display = visibles.length===0 ? 'block':'none';
+  
   const porFecha = {};
   visibles.forEach(g=>{ const k=g.fechaEnvio||'sin-fecha'; if(!porFecha[k])porFecha[k]=[]; porFecha[k].push(g); });
   const fechas = Object.keys(porFecha).sort((a,b)=>b.localeCompare(a));
+  
   document.getElementById('listaGuias').innerHTML = fechas.map(fecha=>{
     const gs = porFecha[fecha];
     const lbl = fecha==='sin-fecha'?'Sin fecha':formatFechaEnvio(fecha);
@@ -357,14 +424,17 @@ function renderGuiaCard(g) {
   const destClass = getDestinoClass(g.code);
   const prefix = g.code.substring(0,3).toUpperCase();
   const badge = diasBadge(g);
+  const retenida = esRetenida(g.items);
   const alerta = esAlerta(g.items);
   const entregada = esEntregada(g);
   const statusLabel = g.lastStatus || STATUS_LABEL[g.lastStatusId] || 'En proceso';
-  const statusColor = entregada ? 'color:var(--verde)' : alerta ? 'color:var(--rojo)' : 'color:var(--azul)';
+  const statusColor = entregada ? 'color:var(--verde)' : retenida ? 'color:var(--rojo-dark)' : alerta ? 'color:var(--rojo)' : 'color:var(--azul)';
   const items = (g.items||[]).filter(i=>i._vstVisible);
   const pct = Math.round(items[0]?._vstPercentageValue||0);
+  
   const timeline = items.map((item,idx)=>{
     const txt = ((item._vstDescription||'')+(item._vstDetail||'')).toLowerCase();
+    const esRet = RETENCION.some(a=>txt.includes(a));
     const esAl = ALERTAS.some(a=>txt.includes(a));
     return `<div class="tl-item">
       <div class="tl-left">
@@ -375,11 +445,13 @@ function renderGuiaCard(g) {
         <div class="tl-title">${item._vstDetail||''}</div>
         ${item._vstDescription&&item._vstDescription!==item._vstDetail?`<div class="tl-desc">${item._vstDescription}</div>`:''}
         ${formatDate(item._vstRealDate)?`<div class="tl-date">🕐 ${formatDate(item._vstRealDate)}</div>`:''}
-        ${esAl?'<div class="tl-alerta">⚠️ Posible demora — revisa con iCargo</div>':''}
+        ${esRet?'<div class="tl-retenida">🚨 RETENIDA — Revisar urgente con iCargo</div>':''}
+        ${!esRet && esAl?'<div class="tl-alerta">⚠️ Posible demora — revisa con iCargo</div>':''}
       </div>
     </div>`;
   }).join('');
-  return `<div class="guia-card${alerta?' alerta':''}" id="card-${g.code}" onclick="toggleDetalle('${g.code}')">
+  
+  return `<div class="guia-card${retenida?' retenida':alerta?' alerta':''}" id="card-${g.code}" onclick="toggleDetalle('${g.code}')">
     <div class="guia-header">
       <div class="dest-badge ${destClass}">${prefix}</div>
       <div class="guia-info">
@@ -389,7 +461,8 @@ function renderGuiaCard(g) {
       </div>
       <div class="guia-right">
         <span class="dias-badge ${badge.cls}">${badge.txt}</span>
-        ${alerta?'<span class="alerta-chip">⚠️ Alerta</span>':''}
+        ${!entregada && retenida?'<span class="retenida-chip">🚨 RETENIDA</span>':''}
+        ${!entregada && !retenida && alerta?'<span class="alerta-chip">⚠️ Alerta</span>':''}
       </div>
     </div>
     <div class="guia-detalle" id="det-${g.code}" onclick="event.stopPropagation()">
