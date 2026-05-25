@@ -427,7 +427,7 @@ function renderGuiaCard(g) {
   const retenida = esRetenida(g.items);
   const alerta = esAlerta(g.items);
   const entregada = esEntregada(g);
-  const statusLabel = g.lastStatus || STATUS_LABEL[g.lastStatusId] || 'En proceso';
+  const statusLabel = entregada ? 'Guía Entregada' : (g.lastStatus || STATUS_LABEL[g.lastStatusId] || 'En proceso');
   const statusColor = entregada ? 'color:var(--verde)' : retenida ? 'color:var(--rojo-dark)' : alerta ? 'color:var(--rojo)' : 'color:var(--azul)';
   const items = (g.items||[]).filter(i=>i._vstVisible);
   const pct = Math.round(items[0]?._vstPercentageValue||0);
