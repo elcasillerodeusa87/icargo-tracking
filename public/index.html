@@ -472,7 +472,7 @@ function renderGuiaCard(g) {
         <button class="btn-sm" onclick="toggleNota('${g.code}')">📝 Nota</button>
         <button class="btn-sm verde" onclick="archivarGuia('${g.code}')">${g.archived?'↩ Restaurar':'✓ Marcar entregada'}</button>
         <button class="btn-sm rojo" onclick="eliminarGuia('${g.code}')">🗑 Eliminar</button>
-        <span style="margin-left:auto;font-size:11px;color:#aaa;">Act: ${formatDate(g.lastCheck)||'—'}</span>
+        <span style="margin-left:auto;font-size:11px;color:#aaa;">📅 ${diasEnTransito(g)} días · Act: ${formatDate(g.lastCheck)||'—'}</span>
       </div>
       ${g.note?`<div class="nota-guardada visible" id="nota-saved-${g.code}">📝 ${g.note}</div>`:`<div class="nota-guardada" id="nota-saved-${g.code}"></div>`}
       <textarea class="nota-area" id="nota-area-${g.code}" rows="2" placeholder="Ej: Cliente avisado, esperando pago aduana...">${g.note||''}</textarea>
