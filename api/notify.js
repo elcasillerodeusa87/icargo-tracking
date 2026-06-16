@@ -74,7 +74,7 @@ module.exports = async (req, res) => {
       guia.lastCheck = new Date().toISOString();
       guia.items = data.items;
 
-      if(true)
+      if(true) {
         const emoji = tieneAlerta ? '⚠️' : dias > 8 ? '🔴' : '✅';
         const msg = `${emoji} *El Casillero de USA*\n\n📦 Guía: ${guia.code}\n📍 Destino: ${dest}\n\n🆕 *${nuevoEstado}*\n⏱ ${dias} días en tránsito${tieneAlerta ? '\n\n⚠️ *Posible demora — revisa con iCargo*' : ''}`;
         await sendWhatsApp(msg);
